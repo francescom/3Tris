@@ -1,0 +1,265 @@
+<!DOCTYPE HTML><html><head><title>3Tris HTML5 Game</title>
+<meta http-equiv="X-UA-Compatible" content="IE=9" />
+<link rel="image_src" href="http://www.pangoo.it/3tris/preview.jpg" />
+<style type="text/css">
+	html,body {margin:0;padding:0; background:#000; color:#fff}
+	
+	
+	
+	#interface {
+		font-family: Arial,Helvetica,sans-serif,sans;
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+	}
+	#intf_start {
+		border: 1px solid #555;
+		background: #222;
+/*		background: rgba(255, 255, 255, 0.1); */
+		opacity:0.8; filter:alpha(opacity=80);
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 400px;
+		height: 200px;
+		margin: -100px 0 0 -200px;
+		padding: 16px;
+		-webkit-border-radius:12px;
+		-moz-border-radius:12px;
+		border-radius:12px;
+	}
+	#startbutton {
+		text-decoration: none;
+		padding: 10px 0 10px 0;
+		color: #999;
+		text-align:center;
+		display: block;
+		border: 1px solid grey;
+		position: absolute;
+		bottom: 10%;
+		left: 50%;
+		width: 100px;
+		margin: -15px 0 0 -50px;
+		-webkit-border-radius:25px;
+		-moz-border-radius:25px;
+		border-radius:25px;
+		background:#444;
+	}
+	#startbutton:hover {
+		background:#555;
+	}
+	#starttext {
+		font-size: 60%;
+	}
+	#scoretext {
+		text-align:center;
+		display: block;
+		position: absolute;
+		top: 50%;
+		left: 10%;
+		right: 10%;
+		top: 50%;
+		margin: 0;
+	}
+	#intf_end { border: 0px solid red;
+		position: absolute;
+		top: 0%;
+		left: 0%;
+		right: 0%;
+		bottom: 0%;
+		visibility: hidden;
+	}
+	#intf_hi { border: 0px solid red;
+		position: absolute;
+		top: 0%;
+		left: 0%;
+		right: 0%;
+		bottom: 0%;
+		visibility: hidden;
+	}
+	
+	#container { border: 0px solid red;
+		position: absolute;
+		top: 0%;
+		left: 0%;
+		height:99%; width:99%;z-index: -200;}  
+	#canvas { border: 0px solid black; /* width:100%; height:100%;*/ }  
+	
+	.label {font-size:9px; font-family:Arial; text-transform:uppercase; text-align:center; margin: 3px; color:#777;}
+	a:hover {}
+
+	#level {width:80px; font-size:24px; font-family:Arial; text-transform:uppercase; text-align:center;
+		position: absolute;
+		top: 15%;
+		left: 99%;
+		margin-left: -80px;
+	}
+	#score {width:80px; font-size:16px; font-family:Arial; text-transform:uppercase; text-align:center;
+		position: absolute;
+		top: 5%;
+		left: 99%;
+		margin-left: -80px;
+	}
+	#curr {width:80px; 
+		position: absolute;
+		top: 32%;
+		left: 99%;
+		margin-left: -80px;
+	}
+	#next {width:80px; 
+		position: absolute;
+		top: 52%;
+		left: 99%;
+		margin-left: -80px;
+	}
+	#logo {
+		position: absolute;
+		top: 99%;
+		left: 99%;
+		margin-left: -48px;
+		margin-top: -94px;
+		position:absolute;
+		width: 46px;
+		height:92px;
+    	z-index: -100;
+    }
+    #next_img {
+    	width:80px;
+		border-left: 1px solid #777;
+		border-top: 1px solid #777;
+		border-bottom: 1px solid #777;
+		border-right: 1px solid #777;
+    }
+    #curr_img {
+    	width:80px;
+		border-left: 1px solid #777;
+		border-top: 1px solid #777;
+		border-bottom: 1px solid #777;
+		border-right: 1px solid #777;
+    }
+</style>  
+
+<style type="text/css">
+sdk\:cacher {
+    behavior: url(#default#userData);
+}
+</style>
+
+<script language="javascript" type="text/javascript" src="jsinc/colors.js" src=""></script>
+<script language="javascript" type="text/javascript" src="jsinc/js_3d_engine.js" src=""></script>
+<script language="javascript" type="text/javascript" src="jsinc/3tris.js" src=""></script>
+<script language="javascript" type="text/javascript" src="jsinc/3tris_draw.js" src=""></script>
+<script language="javascript" type="text/javascript" src="jsinc/basic_canvas_events.js" src=""></script>
+
+<script language="javascript" type="text/javascript">
+	SLOW=true;
+	DONT_MOVE_CAMERA=true;
+	
+	function PlaySound(Nme) {
+		var Snd = document.getElementById(Nme);
+		Snd.play();
+		
+	}
+	
+	function StopSound(Nme) {
+		var Snd = document.getElementById(Nme);
+		Snd.pause();
+		
+	}
+	globalSound="main_loop_sound";
+
+</script>
+<script language="javascript" type="text/javascript">
+	function StartButton() {
+		var Intf = document.getElementById("interface" );
+		var IntfStart = document.getElementById("intf_start");
+		var IntfEnd = document.getElementById("intf_end");
+		var IntfHi = document.getElementById("intf_hi");
+		
+		Intf.style.visibility="hidden";
+		IntfStart.style.visibility="hidden";
+		IntfEnd.style.visibility="hidden";
+		IntfHi.style.visibility="hidden";
+		GameInit();
+	}
+	function ResetIntfToStart() {
+		var Intf = document.getElementById("interface" );
+		var IntfStart = document.getElementById("intf_start");
+		var IntfEnd = document.getElementById("intf_end");
+		var IntfHi = document.getElementById("intf_hi");
+		Intf.style.visibility="visible";
+		IntfStart.style.visibility="visible";
+		IntfEnd.style.visibility="hidden";
+		IntfHi.style.visibility="hidden";
+	}
+	function WriteScores(s,max) {
+		var Sc = document.getElementById("scoretext" );
+		
+		Sc.innerHTML="Last score: "+MyScoreSaverGetLastScore()+"<br />High score: "+MyScoreSaverGetMaxScore();
+	}
+	
+	
+	
+</script>
+<script language="javascript" type="text/javascript" src="jsinc/scoresaver.js" src=""></script>
+
+
+</head><body><div id="container"><canvas id="canvas" width="300" height="300"></canvas></div>
+
+<div id="level"><div class="label">Level</div><div id="level_txt">1</div></div>
+<div id="next"><div class="label">Next</div><img id="next_img" src="3d/3tris_0.gif" /></div>
+<div id="curr"><div class="label">Current</div><img id="curr_img" src="3d/3tris_1.gif" /></div>
+<div id="score"><div class="label">Score</div><span id="score_txt">0</span><span class="label">PTS</span></div><div id="logo"><a href="http://pangoo.it/" target="_blank"><img src="img/pangoo_black_v.png" border="0" /></a></div>
+
+<div id="interface">
+	<div id="intf_start">
+		<div id="starttext">USE ARROW KEYS TO MOVE THE BLOCKS<br />PRESS LETTER KEYS<span style="color:#fff; font-weight:bold; font-size:150%"> A S D </span>TO ROTATE THEM<br />THE<span style="color:#fff; font-weight:bold; font-size:150%"> SPACE BAR </span>ACCELLERATES / DROPS PIECES</div>
+		<div id="scoretext"><small>LAST SCORE: ?</small><br /><small>HIGH SCORE: </small>?</div>
+
+		<a id="startbutton" href="javascript:StartButton(); void(0);">START</a>
+	</div>
+
+	<div id="intf_end"></div>
+	<div id="intf_hi"></div>
+
+</div>
+
+
+
+<sdk:cacher id="score_3tris_last"></sdk:cacher>
+<sdk:cacher id="score_3tris_max"></sdk:cacher>
+
+
+<audio id="wall_sound" autobuffer>
+  <source src="media/3tris_wall.ogg" />
+  <source src="media/3tris_wall.mp3" />
+</audio>
+
+<audio id="piece_sound" autobuffer>
+  <source src="media/3tris_pce.ogg" />
+  <source src="media/3tris_pce.mp3" />
+</audio>
+
+<audio id="no_move_sound" autobuffer loop>
+  <source src="media/blipczt.ogg" />
+  <source src="media/blipczt.mp3" />
+</audio>
+
+<audio id="main_loop_sound" autobuffer loop autoplay>
+  <source src="media/3tris_main_loop.ogg" />
+  <source src="media/3tris_main_loop.mp3" />
+</audio>
+
+<audio id="good_music_sound" autobuffer>
+  <source src="media/music_loop1.ogg" />
+  <source src="media/music_loop1.mp3" />
+</audio>
+
+<audio id="bad_music_sound" autobuffer>
+  <source src="media/music_loop2.ogg" />
+  <source src="media/music_loop2.mp3" />
+</audio>
+
+</body></html>

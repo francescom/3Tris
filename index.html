@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html manifest="manifest.php?finalname=makeitendin.manifest"><head><title>3Tris HTML5 Game</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<link rel="image_src" href="http://www.pangoo.it/3tris/apple-touch-icon.png" />
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+<meta name="apple-touch-fullscreen" content="YES" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<style type="text/css">
+	body {margin:0;padding:0; background:#000; color:#fff}
+	
+	
+	
+	#interface {
+		font-family: Arial,Helvetica,sans-serif,sans;
+		position: absolute;
+		top: 0%;
+		left: 0%;
+		right: 0%;
+		bottom: 0%;
+	}
+	.credit_link {color: #aaa;}
+	#intf_start {
+		border: 1px solid #555;
+		background: #222;
+/*		background: rgba(255, 255, 255, 0.1); */
+		opacity:0.8; filter:alpha(opacity=80);
+		position: absolute;
+		top: 30%;
+		left: 50%;
+		width: 252px;
+		margin: -100px 0 0 -142px;
+		padding: 16px;
+		-webkit-border-radius:12px;
+		-moz-border-radius:12px;
+		border-radius:12px;
+	}
+	.startbutton1,.startbutton2 {
+		text-decoration: none;
+		padding: 10px 0 10px 0;
+		color: #999;
+		text-align:center;
+		display: block;
+		border: 1px solid grey;
+		bottom: 10%;
+		left: 50%;
+		width: 220px;
+		margin: 15px;
+		-webkit-border-radius:25px;
+		-moz-border-radius:25px;
+		border-radius:25px;
+		background:#444;
+	}
+	.startbutton1:hover,.startbutton2:hover {
+		background:#555;
+	}	
+	#starttext {
+		font-size: 60%;
+		margin: 12px;
+	}
+
+	#logo {
+		position: absolute;
+		top: 99%;
+		left: 99%;
+		margin-left: -94px;
+		margin-top: -48px;
+		position:absolute;
+		width: 92px;
+		height:46px;
+    	z-index: -100;
+    }
+
+
+</style>
+
+</head><body><div id="container"><canvas id="canvas" width="300" height="300"></canvas></div>
+<div id="interface">
+	<div id="intf_start">
+		<div id="starttext">PLEASE CHOOSE THE RIGHT VERSION OF THE GAME</div>
+		<div id="starttext">REQUIRES AN HTML5 CAPABLE BROWSER (DON'T TRY IT ON EXPLORER LESS THAN 9.0)</div>
+		<div id="starttext">THIS GAME IS &copy; <a class="credit_link" href="http://pangoo.it/?ln=b">PANGOO DESIGN</a>. SOURCE CODE IS FREE TO USE BY ANYONE.</div>
+
+		<a class="startbutton1" href="fast.html">FAST PC / NOTEBOOK</a>
+		<a class="startbutton2" href="slow.html">SLOW PC / NETBOOK</a>
+		<a class="startbutton1" href="ipad.html">IPAD</a>
+		<a class="startbutton2" href="iphone.html">IPHONE / IPOD TOUCH</a>
+	</div>
+
+	<div id="intf_end"></div>
+	<div id="intf_hi"></div>
+</div>
+
+<div id="logo"><a href="http://pangoo.it/" target="_blank"><img src="img/pangoo_black.gif" border="0" /></a></div>
+
+
+
+<audio id="wall_sound" autobuffer autoplay>
+  <source src="media/3tris_wall.ogg" />
+  <source src="media/3tris_wall.mp3" />
+</audio>
+
+
+<audio id="main_loop_sound" autobuffer loop autoplay>
+  <source src="media/3tris_main_loop.ogg" />
+  <source src="media/3tris_main_loop.mp3" />
+</audio>
+
+
+</body></html>

@@ -1,0 +1,19 @@
+CACHE MANIFEST
+# Cache manifest version 0.0.1e
+jsinc/colors.js
+jsinc/js_3d_engine.js
+jsinc/3tris.js
+jsinc/3tris_draw.js
+jsinc/basic_canvas_events.js
+3d/3tris_0.gif
+3d/3tris_1.gif
+3d/3tris_2.gif
+3d/3tris_3.gif
+3d/3tris_4.gif
+3d/3tris_5.gif
+3d/3tris_6.gif
+3d/3tris_7.gif
+img/pangoo_black.gif
+NETWORK:
+http://pangoo.it/3tris/
+http://www.pangoo.it/3tris/

@@ -1,0 +1,462 @@
+<!DOCTYPE html><html manifest="manifest.php?finalname=makeitendin.manifest"><head><title>3Tris Game</title>
+<link rel="image_src" href="http://www.pangoo.it/3tris/preview.jpg" />
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+<meta name="apple-touch-fullscreen" content="YES" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+
+
+<style type="text/css">
+	body {margin:0;padding:0; background:#000; color:#fff}
+	#main_loop_sound {}
+	#interface {
+		font-family: Arial,Helvetica,sans-serif,sans;
+		position: absolute;
+		top: 0%;
+		left: 0%;
+		right: 0%;
+		bottom: 0%;
+	}
+	#intf_start {
+		border: 1px solid #555;
+		background: #222;
+/*		background: rgba(255, 255, 255, 0.1); */
+		opacity:0.8; filter:alpha(opacity=80);
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 200px;
+		height: 200px;
+		margin: -110px;
+		padding: 10px;
+		-webkit-border-radius:12px;
+		-moz-border-radius:12px;
+		border-radius:12px;
+	}
+	#startbutton {
+		text-decoration: none;
+		padding: 10px 0 10px 0;
+		color: #999;
+		text-align:center;
+		display: block;
+		border: 1px solid grey;
+		position: absolute;
+		bottom: 10%;
+		left: 50%;
+		width: 100px;
+		margin: -15px 0 0 -50px;
+		-webkit-border-radius:25px;
+		-moz-border-radius:25px;
+		border-radius:25px;
+		background:#444;
+	}
+	#startbutton:hover {
+		background:#555;
+	}
+	#starttext {
+		font-size: 60%;
+	}
+	#scoretext {
+		font-size: 60%;
+		text-align:center;
+		display: block;
+		position: absolute;
+		top: 50%;
+		left: 10%;
+		right: 10%;
+		top: 50%;
+		margin: 0;
+	}
+	#intf_end { border: 0px solid red;
+		position: absolute;
+		top: 0%;
+		left: 0%;
+		right: 0%;
+		bottom: 0%;
+		visibility: hidden;
+	}
+	#intf_hi { border: 0px solid red;
+		position: absolute;
+		top: 0%;
+		left: 0%;
+		right: 0%;
+		bottom: 0%;
+		visibility: hidden;
+	}
+
+	#container { border: 0; width:320px; height:320px; margin-top:0; float:left;}
+	#canvas { border: 0px; width:320px; height:320px;}
+	
+	.label {font-size:9px; font-family:Arial; text-transform:uppercase; text-align:center; margin: 3px; color:#777;}
+	a:hover {}
+	* {
+		-webkit-user-select: none;  /* prevent copy paste for all elements */
+	}
+	#level {width:80px; float:left;font-size:24px; font-family:Arial; text-transform:uppercase; text-align:center;}
+	#score {width:80px; float:left;font-size:16px; font-family:Arial; text-transform:uppercase; text-align:center;}
+	#curr {width:80px; float:left;}
+	#next {width:80px; float:left;}
+	#logo {
+		position: absolute;
+		top: 99%;
+		left: 99%;
+		margin-left: -94px;
+		margin-top: -48px;
+		position:absolute;
+		width: 92px;
+		height:46px;
+    	z-index: -100;
+    }
+</style>  
+
+<script language="javascript" type="text/javascript" src="jsinc/colors.js" src=""></script>
+<script language="javascript" type="text/javascript" src="jsinc/js_3d_engine.js" src=""></script>
+<script language="javascript" type="text/javascript" src="jsinc/3tris.js" src=""></script>
+<script language="javascript" type="text/javascript" src="jsinc/3tris_draw.js" src=""></script>
+<script language="javascript" type="text/javascript" src="jsinc/basic_canvas_events.js" src=""></script>
+<script language="javascript" type="text/javascript" src="jsinc/scoresaver.js" src=""></script>
+
+<script language="javascript" type="text/javascript">
+	// setTimeout( function() { window.scrollTo(0,1); }, 1000 );
+	
+	var MoveInterval=null;
+	
+	function ScrollTo(dx,dy) {
+		MoveShape(dx,dy);
+	}
+	
+	function PlaySound(Nme) {
+		var Snd = document.getElementById(Nme);
+		if(Snd) Snd.play();
+	}
+	
+	function StopSound(Nme) {
+		var Snd = document.getElementById(Nme);
+		if(Snd) Snd.pause();
+	}
+	
+	
+	SLOW=true;
+	DONT_MOVE_CAMERA=true;
+	
+	
+	
+	
+	var savedTouches=null;
+	var LastTouchTime;
+	var MIN_TOUCH_TIME=0;
+	
+	
+	function TouchStart(event) {
+		event.preventDefault();
+		var allTouches = event.touches;
+		var changedTouches = event.changedTouches;
+		var targetTouches = event.targetTouches;
+		
+		InitFingers(allTouches);
+		if(allTouches.length>=3) {
+			DropDown();
+		}
+	}
+	
+	function TouchMove(event) {
+		event.preventDefault();
+		var allTouches = event.touches;
+		var changedTouches = event.changedTouches;
+		var targetTouches = event.targetTouches;
+		
+		var GestureInfo=PrepareFingers(allTouches);
+		// {num:2,angle: 33,dist:{from: 100,to:125},movement:{x:+55,y:-34},all:[[],...]};
+		
+		if(GestureInfo) {
+			if(GestureInfo.num==1) {
+				if(GestureInfo.movement.x>GameCellWidth/2) {
+					ScrollTo(1,0);
+					savedTouches[0].pageX=allTouches[0].pageX;
+					// TouchStart(event);
+					GameDrawFrame();
+				} else if(GestureInfo.movement.x<-GameCellWidth/2) {
+					ScrollTo(-1,0);
+					savedTouches[0].pageX=allTouches[0].pageX;
+					// TouchStart(event);
+					GameDrawFrame();
+				} else if(GestureInfo.movement.y>GameCellWidth/2) {
+					ScrollTo(0,1);
+					savedTouches[0].pageY=allTouches[0].pageY;
+					// TouchStart(event);
+					GameDrawFrame();
+				} else if(GestureInfo.movement.y<-GameCellWidth/2) {
+					ScrollTo(0,-1);
+					savedTouches[0].pageY=allTouches[0].pageY;
+					// TouchStart(event);
+					GameDrawFrame();
+				}
+			} else if(GestureInfo.num==2) {
+				if(GestureInfo.movement.x>GameCellWidth/2) {
+					CheckOrRevert(_RotateY(DupArray(GameShape)));
+					TouchStart(event);
+					GameDrawFrame();
+				} else if(GestureInfo.movement.x<-GameCellWidth/2) {
+					CheckOrRevert(RotateY(DupArray(GameShape)));
+					TouchStart(event);
+					GameDrawFrame();
+				} else if(GestureInfo.movement.y>GameCellWidth/2) {
+					CheckOrRevert(_RotateX(DupArray(GameShape)));
+					TouchStart(event);
+					GameDrawFrame();
+				} else if(GestureInfo.movement.y<-GameCellWidth/2) {
+					CheckOrRevert(RotateX(DupArray(GameShape)));
+					TouchStart(event);
+					GameDrawFrame();
+				} else if(GestureInfo.angle>20) {
+					CheckOrRevert(_RotateZ(DupArray(GameShape)));
+					TouchStart(event);
+					GameDrawFrame();
+				} else if(GestureInfo.angle<-20) {
+					CheckOrRevert(RotateZ(DupArray(GameShape)));
+					TouchStart(event);
+					GameDrawFrame();
+				} else if(GestureInfo.dist.to*2<GestureInfo.dist.from) {
+					// Pinch
+					// DropDown();
+					// TouchStart(event);
+				}
+			}
+				deb("a:"+Math.round(GestureInfo.angle)+"<br />d:"+Math.round(GestureInfo.dist.to/GestureInfo.dist.from*100)+"<br />m:"+GestureInfo.movement.x+","+GestureInfo.movement.y);
+		}
+		
+		
+		
+	}
+	function TouchEnd(event) {
+		event.preventDefault();
+	}
+	
+	function TouchCancel(event) {
+		event.preventDefault();
+	}
+	
+
+
+// requires savedTouches;
+function InitFingers(targetTouches) {
+	savedTouches=null;
+	// PrepareFingers(targetTouches);
+}
+
+
+function print_r(theObj){
+var Out="";
+  if(theObj.constructor == Array || theObj.constructor == Object) {
+	Out+=("<ul>");
+	for(var p in theObj){
+	  if(theObj[p] && (theObj[p].constructor == Array || theObj[p].constructor == Object)) {
+		Out+=("<"+"li>["+p+"] => "+typeof(theObj)+"<"+"/li>");
+		Out+=("<ul>");
+		Out+=print_r(theObj[p]);
+		Out+=("<"+"/ul>");
+	  } else {
+Out+=("<li>["+p+"] => "+theObj[p]+"<"+"/li>");
+	  }
+	}
+	Out+=("<"+"/ul>");
+  }
+  return Out;
+}
+
+
+
+
+
+// requires savedTouches;
+function PrepareFingers(targetTouches) {
+		
+		if(savedTouches==null) {
+			savedTouches=duplicateTouches(targetTouches);
+			LastTouchTime=getTimer();
+		}
+		
+		if(savedTouches.length!=targetTouches.length) {
+			// New fingers?
+			savedTouches=duplicateTouches(targetTouches);
+			LastTouchTime=getTimer();
+			return InitFingers(targetTouches);
+		}
+		
+		if(getTimer()-LastTouchTime<MIN_TOUCH_TIME) return;
+		
+		if(savedTouches.length<1) {
+			InitFingers(targetTouches);
+			return false;
+		}
+		
+		var fingernum,avgX,avgY,angle1,angle2,angle=false,dist=false;
+		var Finger=[];
+		
+		fingerNum=targetTouches.length;
+		
+		if(savedTouches.length>=2 && targetTouches.length>=2) {
+			var d1x=(savedTouches[1].pageX - savedTouches[0].pageX);
+			var d1y=(savedTouches[1].pageY - savedTouches[0].pageY);
+			var d2x=(targetTouches[1].pageX - targetTouches[0].pageX);
+			var d2y=(targetTouches[1].pageY - targetTouches[0].pageY);
+			
+			//deb(" d1x: "+d1x+" d1y: "+d1y+" d2x: "+d2x+" d2y: "+d2y);
+
+			if(d1x==0) angle1=Math.PI/2;
+			else angle1=Math.atan((d1y)/(d1x));
+			
+			if(savedTouches[1].pageX < savedTouches[0].pageX) angle1+=Math.PI;
+			angle2=angle2+Math.PI*100;
+
+			if(d2x==0) angle2=Math.PI/2;
+			else angle2=Math.atan((d2y)/(d2x));
+			
+			if(targetTouches[1].pageX < targetTouches[0].pageX) angle2+=Math.PI;
+			angle2=angle2+Math.PI*100;
+			
+			angle=angle2-angle1+Math.PI*1000;
+			angle=(angle) % (Math.PI*2);
+			if(angle>Math.PI) angle-=2*Math.PI
+			
+			// deb("a1: "+Math.round(angle1*180/Math.PI)+"<br />a2: "+Math.round(angle2*180/Math.PI)+"<br />a: "+Math.round((angle)*180/Math.PI));
+			
+			
+			var dist1=Math.sqrt(d1x*d1x+d1y+d1y);
+			var dist2=Math.sqrt(d2x*d2x+d2y+d2y);
+			dist={from:dist1,to:dist2};
+			// deb("d1: "+dist1+"<br />d2: "+dist2);
+			
+		}
+		
+		avgX=0;
+		avgY=0;
+		
+		for(var i=0;i<savedTouches.length;i++) {
+			var dx = targetTouches[i].pageX - savedTouches[i].pageX;
+			var dy = targetTouches[i].pageY - savedTouches[i].pageY;
+			Finger.push([dx,dy]);
+			avgX+=dx;
+			avgY+=dy;
+			
+		}
+		avgX/=fingerNum;
+		avgY/=fingerNum;
+		 // deb("mv: "+avgX+","+avgY);
+		
+		return {num:fingerNum,angle:angle*180/Math.PI,dist:dist,movement:{x:avgX,y:avgY},all:Finger};
+}	
+
+function duplicateTouches(Ob) {
+	var newObj = []
+	for (var i=0;i< Ob.length;i++) {
+		newObj[i] = {pageX:Ob[i].pageX,pageY:Ob[i].pageY};
+	}
+	return newObj;
+};
+
+function deb(txt) {
+	// document.getElementById('debug').innerHTML=txt;
+}	
+
+</script>
+<script language="javascript" type="text/javascript">
+	function StartButton() {
+		var Intf = document.getElementById("interface" );
+		var IntfStart = document.getElementById("intf_start");
+		var IntfEnd = document.getElementById("intf_end");
+		var IntfHi = document.getElementById("intf_hi");
+		
+		Intf.style.visibility="hidden";
+		IntfStart.style.visibility="hidden";
+		IntfEnd.style.visibility="hidden";
+		IntfHi.style.visibility="hidden";
+		GameInit();
+		document.body.ontouchstart=TouchStart;
+		document.body.ontouchmove=TouchMove;
+		document.body.ontouchend=TouchEnd;
+		document.body.ontouchcancel=TouchCancel;
+	}
+	function ResetIntfToStart() {
+		var Intf = document.getElementById("interface" );
+		var IntfStart = document.getElementById("intf_start");
+		var IntfEnd = document.getElementById("intf_end");
+		var IntfHi = document.getElementById("intf_hi");
+		Intf.style.visibility="visible";
+		IntfStart.style.visibility="visible";
+		IntfEnd.style.visibility="hidden";
+		IntfHi.style.visibility="hidden";
+		document.body.ontouchstart=null;
+		document.body.ontouchmove=null;
+		document.body.ontouchend=null;
+		document.body.ontouchcancel=null;
+	}
+	function WriteScores(s,max) {
+		var Sc = document.getElementById("scoretext" );
+		
+		Sc.innerHTML="<small>LAST SCORE: </small>"+MyScoreSaverGetLastScore()+"<br /><small>HIGH SCORE: </small>"+MyScoreSaverGetMaxScore();
+	}
+</script>
+
+</head><body>
+<div id="interface">
+	<div id="intf_start">
+		<div id="starttext">TO MOVE: DRAG WITH ONE FINGER<br />TO ROTATE: USE TWO FINGERS<br />TO DROP: TOUCH WITH THREE FINGERS<br />&nbsp;<br />TO ADD THIS WEBAPP TO YOUR APPLICATIONS TOUCH THE BOOKMARK BUTTON AND SELECT "ADD TO HOME".</div>
+		<div id="scoretext"><small>LAST SCORE: ?</small><br /><small>HIGH SCORE: </small>?</div>
+
+		<a id="startbutton" href="javascript:StartButton(); void(0);">START</a>
+	</div>
+
+	<div id="intf_end"></div>
+	<div id="intf_hi"></div>
+</div>
+
+<div id="container"><canvas id="canvas" width="300" height="300"></canvas></div>
+
+<div id="level"><div class="label">Level</div><div id="level_txt">1</div></div>
+<div id="next"><div class="label">Next</div><img id="next_img" src="3d/3tris_0.gif" /></div>
+<div id="curr"><div class="label">Current</div><img id="curr_img" src="3d/3tris_1.gif" /></div>
+<div id="score"><div class="label">Score</div><span id="score_txt">0</span><span class="label">PTS</span></div><div id="logo"><a href="http://pangoo.it/" target="_blank"><img src="img/pangoo_black.gif" border="0" /></a></div>
+
+
+
+
+<audio id="wall_sound" autobuffer>
+  <source src="media/3tris_wall.ogg" />
+  <source src="media/3tris_wall.mp3" />
+</audio>
+
+<audio id="piece_sound" autobuffer>
+  <source src="media/3tris_pce.ogg" />
+  <source src="media/3tris_pce.mp3" />
+</audio>
+
+<audio id="no_move_sound" autobuffer loop>
+  <source src="media/blipczt.ogg" />
+  <source src="media/blipczt.mp3" />
+</audio>
+
+<audio id="main_loop_sound" autobuffer loop autoplay>
+  <source src="media/3tris_main_loop.ogg" />
+  <source src="media/3tris_main_loop.mp3" />
+</audio>
+
+<audio id="good_music_sound" autobuffer>
+  <source src="media/music_loop1.ogg" />
+  <source src="media/music_loop1.mp3" />
+</audio>
+
+<audio id="bad_music_sound" autobuffer>
+  <source src="media/music_loop2.ogg" />
+  <source src="media/music_loop2.mp3" />
+</audio>
+
+</body><script language="javascript" type="text/javascript">
+
+
+
+
+
+</script>
+</html>
